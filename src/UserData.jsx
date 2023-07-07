@@ -1,56 +1,73 @@
 
-import { NavLink } from 'react-router-dom';
+import { NavLink , useLocation} from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Height } from '@mui/icons-material';
+import download from 'downloadjs';
+import html2canvas from 'html2canvas';
 
 const UserData = () => {
 
-//   const [data, setData] = useState([]);
+    const location = useLocation();
+    const url = location.pathname;
+    // const url = 'xyz/abc/1';
+    const parts = url.split('/');
+    const curruid = parts[parts.length - 1];
+    
+    const [user, setUser] = useState({id:-1});
 
-//   useEffect(() => {
-//     const fetchData = async () => {
-//       try {
-//         const response = await axios.get('https://reqres.in/api/users?page=2');
-//         setData(response.data);
-//       } catch (error) {
-//         console.error(error);
-//       }
-//     };
+    useEffect(() => {
+      const fetchUsers = async () => {
+        try {
+          const response = await axios.get('https://reqres.in/api/users?page=2');
+          console.log(response.data.data);
 
-//     fetchData();
-//   }, []);
+            const users = response.data.data;
+            console.log(users);
+            const curruser = users.map(function(user){
+                console.log("hello");
+                if(user.id == curruid){
+                    console.log("ok");
+                    setUser(user);
+                }    
+            })
+        //   
+        } catch (error) {
+          console.error('Error fetching users:', error);
+        }
+      };
+  
+      fetchUsers();
+    }, []);
+
+    const handleDownload = () => {
+        html2canvas(document.body).then((canvas) => {
+          const dataURL = canvas.toDataURL('image/jpeg');
+          download(dataURL, 'page.jpeg');
+        });
+      };
+
+    
 
   return (
     <div>
-            {/* <h1>User List </h1> */}
-            {/* {users.map((user) => (
-                <NavLink>
-                <div key={user.id} style={cardStyle}>
-                <img
-                    src={`https://i.pravatar.cc/150?u=${user.id}`}
-                    alt={user.name}
-                    style={avatarStyle}
-                />
-                <div style={infoStyle}>
-                    <h2>{user.name}</h2>
-                    <p>{user.email}</p>
-                    <p>{user.phone}</p>
-                </div>
-                </div>
-            </NavLink>
-            ))} */}
+            {/* <h1> {curruid}</h1>
+            <h1> {user.id}</h1> */}
+            
+                    <div style={{ display: 'flex' }}>
+                    <img height={250} width={250} src={user.avatar}>
 
-            <div style={{ display: 'flex' }}>
-                <img height={250} width={250} src='https://reqres.in/img/faces/10-image.jpg'>
-
-                </img>
-                <div >
-                    <div style={{ width:200, backgroundColor: '#ccc' }}></div>
-                    <div style={{ flex: 1, backgroundColor: '#f2f2f2', padding: '10px' }}>Name : Dev patel </div>
-                    <div style={{ flex: 1, backgroundColor: '#f2f2f2', padding: '10px' }}>Email : devapatel1122@gmail.com</div>
+                    </img>
+                    <div >
+                        <div style={{ width:200, backgroundColor: '#ccc' }}></div>
+                        <div style={{ flex: 1, backgroundColor: '#f2f2f2', padding: '10px' }}>Name : {user.first_name} {user.last_name}</div>
+                        <div style={{ flex: 1, backgroundColor: '#f2f2f2', padding: '10px' }}>Email : {user.email}</div>
+                    </div>
                 </div>
-            </div>
+           
+                <button onClick={handleDownload}>Download Page as JPEG</button>
+
+
+            
             
     </div>
   )
